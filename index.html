@@ -1,38 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Loading…</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
-<body style="font-family:sans-serif; text-align:center; padding:40px;">
+<body style="font-family: sans-serif; text-align: center; padding: 40px;">
   <h2>Loading your code…</h2>
+  <p style="color:#666;">Please wait a moment.</p>
 
   <script>
-    // 1. Your Redirect App URL (Project B)
+    // 1) Your PERMANENT Redirect App URL (Project B)
     const REDIRECT_APP_URL =
       "https://script.google.com/macros/s/AKfycbyT9NHGkvWE5nnFdStbsqsdg03RIquupiOKVu-D7cGIQkG-7DFjcan00GuTKu68AGOO/exec";
 
-    // 2. Ask Apps Script for today’s token
+    // 2) Your Claim App base URL (Project A)
+    const CLAIM_BASE_URL =
+      "https://script.google.com/macros/s/AKfycbxeEmCQTpQyKSzNY9oCZIQ7sYk_R7ALPlPs6Jt5dcdcXSRQ-pFz-9c7XnK5UsHJSIhlog/exec";
+
+    // Ask the Redirect App for today's token, then build a full temp URL
     fetch(REDIRECT_APP_URL + "?mode=token")
-      .then(r => r.text())
-      .then(token => {
+      .then(function (res) {
+        return res.text();
+      })
+      .then(function (token) {
         token = token.trim();
+
         if (!token) {
-          document.body.innerHTML = "<h2>Error: No token generated.</h2>";
+          document.body.innerHTML =
+            "<h2>Error: No token generated.</h2><p>Ask an event admin to run <code>generateDailyURL()</code>.</p>";
           return;
         }
 
-        // 3. Build the FINAL URL the player should see
-        const finalURL =
-          "https://script.google.com/macros/s/AKfycbxeEmCQTpQyKSzNY9oCZIQ7sYk_R7ALPlPs6Jt5dcdcXSRQ-pFz-9c7XnK5UsHJSIhlog/exec"
-          + "?token=" + encodeURIComponent(token);
+        // Build the FULL temporary URL that should be visible to the player
+        const finalURL = CLAIM_BASE_URL + "?token=" + encodeURIComponent(token);
 
-        // 4. REAL redirect (this changes the browser URL!)
+        // Real redirect — this changes the *browser address bar* to the temp URL
         window.location.href = finalURL;
       })
-      .catch(err => {
-        document.body.innerHTML = "<h2>Error loading code.</h2>";
+      .catch(function (err) {
         console.error(err);
+        document.body.innerHTML =
+          "<h2>Error loading code.</h2><p>Please try again later or ask an event admin.</p>";
       });
   </script>
 </body>
