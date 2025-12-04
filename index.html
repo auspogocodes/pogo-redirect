@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Loading…</title>
+</head>
+<body style="font-family:sans-serif; text-align:center; padding:40px;">
+  <h2>Loading your code…</h2>
+
+  <script>
+    // 1. Your Redirect App URL (Project B)
+    const REDIRECT_APP_URL =
+      "https://script.google.com/macros/s/AKfycbyT9NHGkvWE5nnFdStbsqsdg03RIquupiOKVu-D7cGIQkG-7DFjcan00GuTKu68AGOO/exec";
+
+    // 2. Ask Apps Script for today’s token
+    fetch(REDIRECT_APP_URL + "?mode=token")
+      .then(r => r.text())
+      .then(token => {
+        token = token.trim();
+        if (!token) {
+          document.body.innerHTML = "<h2>Error: No token generated.</h2>";
+          return;
+        }
+
+        // 3. Build the FINAL URL the player should see
+        const finalURL =
+          "https://script.google.com/macros/s/AKfycbxeEmCQTpQyKSzNY9oCZIQ7sYk_R7ALPlPs6Jt5dcdcXSRQ-pFz-9c7XnK5UsHJSIhlog/exec"
+          + "?token=" + encodeURIComponent(token);
+
+        // 4. REAL redirect (this changes the browser URL!)
+        window.location.href = finalURL;
+      })
+      .catch(err => {
+        document.body.innerHTML = "<h2>Error loading code.</h2>";
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
