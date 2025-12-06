@@ -1,48 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Loading…</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-</head>
-<body style="font-family: sans-serif; text-align: center; padding: 40px;">
-  <h2>Loading your code…</h2>
-  <p style="color:#666;">Please wait a moment.</p>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Redirecting...</title>
   <script>
-    // 1) Your PERMANENT Redirect App URL (Project B)
-    const REDIRECT_APP_URL =
-      "https://script.google.com/macros/s/AKfycbyT9NHGkvWE5nnFdStbsqsdg03RIquupiOKVu-D7cGIQkG-7DFjcan00GuTKu68AGOO/exec";
+    const secret = 'auspogo-codes'; // Change this if you want
 
-    // 2) Your Claim App base URL (Project A)
-    const CLAIM_BASE_URL =
-      "https://script.google.com/macros/s/AKfycbxeEmCQTpQyKSzNY9oCZIQ7sYk_R7ALPlPs6Jt5dcdcXSRQ-pFz-9c7XnK5UsHJSIhlog/exec";
+    function hashCode(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash |= 0;
+      }
+      return Math.abs(hash).toString(36);
+    }
 
-    // Ask the Redirect App for today's token, then build a full temp URL
-    fetch(REDIRECT_APP_URL + "?mode=token")
-      .then(function (res) {
-        return res.text();
-      })
-      .then(function (token) {
-        token = token.trim();
+    window.onload = function () {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const dateString = `${yyyy}${mm}${dd}${secret}`;
+      const slug = hashCode(dateString);
+      const redirectURL = `./promo/${slug}.html`;
 
-        if (!token) {
-          document.body.innerHTML =
-            "<h2>Error: No token generated.</h2><p>Ask an event admin to run <code>generateDailyURL()</code>.</p>";
-          return;
-        }
-
-        // Build the FULL temporary URL that should be visible to the player
-        const finalURL = CLAIM_BASE_URL + "?token=" + encodeURIComponent(token);
-
-        // Real redirect — this changes the *browser address bar* to the temp URL
-        window.location.href = finalURL;
-      })
-      .catch(function (err) {
-        console.error(err);
-        document.body.innerHTML =
-          "<h2>Error loading code.</h2><p>Please try again later or ask an event admin.</p>";
-      });
+      window.location.href = redirectURL;
+    };
   </script>
+</head>
+<body>
+  <p>Redirecting you to today's code... 🎁</p>
 </body>
 </html>
