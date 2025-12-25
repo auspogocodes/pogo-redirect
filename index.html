@@ -94,47 +94,62 @@
   <div id="code-box"></div>
   <div id="message"></div>
 
-  <script>
-    let codeClaimed = false;
-    let claimedCode = null;
+<script>
+  let claimedCode = null;
+  let hasClaimed = false;
 
-    async function claimCode() {
-      const btn = document.getElementById('claim-btn');
-      const codeBox = document.getElementById('code-box');
-      const message = document.getElementById('message');
+  const WORKER_URL = "https://pogo-claim.austinpogo-codes.workers.dev/";
 
-      if (!codeClaimed) {
-        try {
-          const res = await fetch('https://pogo-claim.austinpogo-codes.workers.dev/');
-          const data = await res.json();
+  async function claimCode() {
+    const btn = document.getElementById("claim-btn");
+    const codeBox = document.getElementById("code-box");
+    const message = document.getElementById("message");
 
-          if (data.code) {
-            claimedCode = data.code;
-            codeBox.textContent = claimedCode;
-            codeClaimed = true;
-            copyToClipboard(claimedCode);
-            message.textContent = 'Code copied to clipboard!';
-          } else {
-            codeBox.textContent = 'No codes available 😢';
-            btn.disabled = true;
-          }
-        } catch (err) {
-          codeBox.textContent = 'Error retrieving code.';
-          console.error(err);
-        }
-      } else if (claimedCode) {
-        copyToClipboard(claimedCode);
-        message.textContent = 'Code copied again!';
+    // If already claimed, just copy again
+    if (hasClaimed && claimedCode) {
+      copy(claimedCode);
+      message.textContent = "Code copied again!";
+      return;
+    }
+
+    btn.disabled = true;
+    message.textContent = "Claiming code…";
+
+    try {
+      const res = await fetch(WORKER_URL);
+      const data = await res.json();
+
+      if (data.code) {
+        claimedCode = data.code;
+        hasClaimed = true;
+
+        codeBox.textContent = claimedCode;
+        copy(claimedCode);
+        message.textContent = "Code copied to clipboard!";
+      } else if (data.reason === "NO_CODES_LEFT") {
+        codeBox.textContent = "No codes available";
+        message.textContent = "All codes have been claimed.";
+      } else {
+        codeBox.textContent = "Unexpected response.";
+        message.textContent = "Please try again later.";
       }
-    }
 
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).catch(err => {
-        console.error('Clipboard copy failed', err);
-      });
+    } catch (err) {
+      console.error(err);
+      codeBox.textContent = "Unable to connect";
+      message.textContent =
+        "Could not reach the claim server. Please try again.";
     }
+  }
 
-    document.getElementById('claim-btn').addEventListener('click', claimCode);
-  </script>
+  function copy(text) {
+    navigator.clipboard.writeText(text).catch(() => {});
+  }
+
+  document
+    .getElementById("claim-btn")
+    .addEventListener("click", claimCode);
+</script>
+
 </body>
 </html>
