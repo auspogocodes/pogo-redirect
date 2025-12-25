@@ -5,16 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Austin Pogo Code Claim</title>
 
-  <!-- Noto Sans Google Font -->
+  <!-- Noto Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
+    /* IMPORTANT: allow background to fill screen */
+    html, body {
+      height: 100%;
+    }
+
     body {
       margin: 0;
       font-family: "Noto Sans", sans-serif;
-      background: linear-gradient(to bottom,  
+      background: linear-gradient(to bottom,
         #00aafa 0%,
         #48c5f4 12%,
         #bbf0fe 34%,
@@ -22,73 +27,93 @@
         #72f7c7 44%,
         #6dfb95 74%,
         #01907c 100%);
+      background-repeat: no-repeat;
+      background-size: cover;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
-      padding: 2rem;
-        background-repeat: no-repeat;
-  background-size: cover;
+
+      padding: 2rem 1rem;
+      box-sizing: border-box;
     }
 
+    /* LOGO */
     #logo {
-      width: 120px;
-      height: 120px;
-      border-radius: 8px; /* Rounded corners */
-      margin: 0 auto 1rem;
+      width: 110px;
+      height: 110px;
+      border-radius: 10px;
+      margin-bottom: 1rem;
     }
 
     h1 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
+      margin: 0 0 1.25rem;
+      font-size: 1.6rem;
+      letter-spacing: 0.05em;
       color: #21386e;
     }
 
-    #copy-text {
+    /* MESSAGE BUBBLE */
+    #message {
       background: white;
-      display: inline-block;
       padding: 0.75rem 1.25rem;
-      border-radius: 12px;
+      border-radius: 14px;
       font-size: 1rem;
       margin-bottom: 1rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
     }
 
-    #code-display {
+    /* CODE DISPLAY */
+    #code-box {
       display: none;
       font-size: 1.5rem;
       font-weight: 700;
-      padding: 1rem;
-      border-radius: 12px;
+      padding: 0.9rem 1.5rem;
+      border-radius: 14px;
       background: white;
       color: #21386e;
       border: 3px solid #2d71b7;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.25);
       margin-bottom: 1rem;
     }
 
+    /* CLAIM BUTTON */
     #claim-btn {
       background-color: #ffcb05;
       color: #21386e;
       font-weight: 700;
       font-size: 1.25rem;
       border: 3px solid #2d71b7;
-      padding: 0.75rem 2rem;
-      border-radius: 12px;
+      padding: 0.75rem 2.25rem;
+      border-radius: 14px;
       cursor: pointer;
+
       box-shadow:
-        0 6px #21386e,
-        inset 0 -4px #d4aa07;
+        0 6px 0 #21386e,
+        inset 0 -4px 0 #d4aa07;
     }
 
     #claim-btn:active {
-      transform: translateY(1px);
+      transform: translateY(2px);
+      box-shadow:
+        0 4px 0 #21386e,
+        inset 0 -3px 0 #d4aa07;
     }
 
+    #claim-btn:disabled {
+      opacity: 0.7;
+      cursor: default;
+    }
+
+    /* REDEEM LINK */
     #redeem-link {
       display: none;
       background: white;
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
+      padding: 0.6rem 1rem;
+      border-radius: 12px;
       margin-top: 1rem;
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
 
     #redeem-link a {
@@ -96,47 +121,66 @@
       text-decoration: underline;
     }
 
+    /* FOOTER */
     .footer-note {
-      margin-top: 2rem;
+      margin-top: auto;
+      padding-top: 2rem;
       font-size: 0.9rem;
+      color: #21386e;
     }
   </style>
 </head>
+
 <body>
-  <img id="logo" src="https://raw.githubusercontent.com/auspogocodes/pogo-redirect/main/austinpogo-logo.jpg" alt="Austin Pogo Logo">
+
+  <!-- LOGO -->
+  <img
+    id="logo"
+    src="https://raw.githubusercontent.com/auspogocodes/pogo-redirect/main/austinpogo-logo.jpg"
+    alt="Austin Pogo Logo"
+  >
 
   <h1>AUSTIN POGO</h1>
 
-  <div id="copy-text">Tap to copy your code!</div>
+  <div id="message">Tap to copy your code!</div>
+
   <button id="claim-btn">CLAIM CODE</button>
 
-  <div id="code-display"></div>
+  <div id="code-box"></div>
+
   <div id="redeem-link">
-    Redeem at: <a href="https://store.pokemongo.com/offer-redemption" target="_blank">https://store.pokemongo.com/offer-redemption</a>
+    Redeem at:
+    <a href="https://store.pokemongo.com/offer-redemption" target="_blank">
+      https://store.pokemongo.com/offer-redemption
+    </a>
   </div>
 
-  <div class="footer-note">Limited redemption: one device, once a day</div>
+  <div class="footer-note">
+    Limited redemption: one device, once a day
+  </div>
 
 <script>
+  const WORKER_URL = "https://pogo-claim.austinpogo-codes.workers.dev/";
+
   let claimedCode = null;
   let hasClaimed = false;
 
-  const WORKER_URL = "https://pogo-claim.austinpogo-codes.workers.dev/";
+  const message = document.getElementById("message");
+  const codeBox = document.getElementById("code-box");
+  const redeemLink = document.getElementById("redeem-link");
+  const btn = document.getElementById("claim-btn");
 
   async function claimCode() {
-    const btn = document.getElementById("claim-btn");
-    const codeBox = document.getElementById("code-box");
-    const message = document.getElementById("message");
 
-    // If already claimed, just copy again
+    /* Already claimed → just copy again */
     if (hasClaimed && claimedCode) {
       copy(claimedCode);
-      message.textContent = "Code copied again!";
+      message.textContent = "Code copied!";
       return;
     }
 
     btn.disabled = true;
-    message.textContent = "Claiming code…";
+    message.textContent = "Claiming your code…";
 
     try {
       const res = await fetch(WORKER_URL);
@@ -147,21 +191,18 @@
         hasClaimed = true;
 
         codeBox.textContent = claimedCode;
+        codeBox.style.display = "block";
+        redeemLink.style.display = "block";
+
         copy(claimedCode);
-        message.textContent = "Code copied to clipboard!";
-      } else if (data.reason === "NO_CODES_LEFT") {
-        codeBox.textContent = "No codes available";
-        message.textContent = "All codes have been claimed.";
+        message.textContent = "Code copied!";
       } else {
-        codeBox.textContent = "Unexpected response.";
-        message.textContent = "Please try again later.";
+        message.textContent = "All codes have been claimed.";
       }
 
     } catch (err) {
       console.error(err);
-      codeBox.textContent = "Unable to connect";
-      message.textContent =
-        "Could not reach the claim server. Please try again.";
+      message.textContent = "Unable to reach server. Try again later.";
     }
   }
 
@@ -169,9 +210,7 @@
     navigator.clipboard.writeText(text).catch(() => {});
   }
 
-  document
-    .getElementById("claim-btn")
-    .addEventListener("click", claimCode);
+  btn.addEventListener("click", claimCode);
 </script>
 
 </body>
