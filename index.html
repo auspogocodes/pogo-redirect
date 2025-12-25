@@ -186,16 +186,18 @@
       const res = await fetch(WORKER_URL);
       const data = await res.json();
 
-      if (data.code) {
-        claimedCode = data.code;
-        hasClaimed = true;
+if (data.code) {
+  claimedCode = data.code;
+  hasClaimed = true;
 
-        codeBox.textContent = claimedCode;
-        codeBox.style.display = "block";
-        redeemLink.style.display = "block";
+  codeBox.textContent = claimedCode;
+  codeBox.style.display = "block";
+  redeemLink.style.display = "block";
 
-        copy(claimedCode);
-        message.textContent = "Code copied!";
+  copy(claimedCode);
+  message.textContent = "Code copied!";
+  btn.style.display = "none"; // <-- hide the button after claiming
+}
       } else {
         message.textContent = "All codes have been claimed.";
       }
