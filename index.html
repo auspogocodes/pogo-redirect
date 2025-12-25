@@ -172,32 +172,41 @@
 
   async function claimCode() {
 
-    /* Already claimed → just copy again */
+    // If already claimed → clicking code box itself will copy
     if (hasClaimed && claimedCode) {
-      copy(claimedCode);
-      message.textContent = "Code copied!";
+      navigator.clipboard.writeText(claimedCode).catch(() => {});
+      message.textContent = "Code copied again!";
       return;
     }
 
-    btn.disabled = true;
     message.textContent = "Claiming your code…";
+    btn.disabled = true;
 
     try {
       const res = await fetch(WORKER_URL);
       const data = await res.json();
 
-if (data.code) {
-  claimedCode = data.code;
-  hasClaimed = true;
+      if (data.code) {
+        claimedCode = data.code;
+        hasClaimed = true;
 
-  codeBox.textContent = claimedCode;
-  codeBox.style.display = "block";
-  redeemLink.style.display = "block";
+        codeBox.textContent = claimedCode;
+        codeBox.style.display = "block";
+        redeemLink.style.display = "block";
 
-  copy(claimedCode);
-  message.textContent = "Code copied!";
-  btn.style.display = "none"; // <-- hide the button after claiming
-}
+        navigator.clipboard.writeText(claimedCode).catch(() => {});
+        message.textContent = "Code copied! Tap the code to copy again.";
+
+        // *REMOVE* the button now that a code is claimed
+        btn.style.display = "none";
+
+        // Optional: *let the code box itself copy*
+        codeBox.style.cursor = "pointer";
+        codeBox.addEventListener("click", () => {
+          navigator.clipboard.writeText(claimedCode).catch(() => {});
+          message.textContent = "Code copied again!";
+        });
+
       } else {
         message.textContent = "All codes have been claimed.";
       }
@@ -205,15 +214,13 @@ if (data.code) {
     } catch (err) {
       console.error(err);
       message.textContent = "Unable to reach server. Try again later.";
+      btn.disabled = false; // re‑enable button on error
     }
-  }
-
-  function copy(text) {
-    navigator.clipboard.writeText(text).catch(() => {});
   }
 
   btn.addEventListener("click", claimCode);
 </script>
+
 
 </body>
 </html>
